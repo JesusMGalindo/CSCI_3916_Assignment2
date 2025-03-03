@@ -72,27 +72,47 @@ router.post('/signin', (req, res) => {
     }
 });
 
-router.route('/testcollection')
-    .delete(authController.isAuthenticated, (req, res) => {
-        console.log(req.body);
-        res = res.status(200);
-        if (req.get('Content-Type')) {
-            res = res.type(req.get('Content-Type'));
-        }
+router.route('/movies')
+    .get((req, res) => {
+        // GET 
+        // Return status, message: "GET movies", headers, query, env
+        let o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "GET movies";
+        o.query = req.query;
+        return res.json(o);
+    })
+    .post((req, res) => {
+        // POST 
+        // Return status, message: "movie saved"
         var o = getJSONObjectForMovieRequirement(req);
-        res.json(o);
-    }
-    )
+        o.status = 200;
+        o.message = "movie saved";
+        o.query = req.query;
+        res.status(201).json(o);
+    })
     .put(authJwtController.isAuthenticated, (req, res) => {
-        console.log(req.body);
-        res = res.status(200);
-        if (req.get('Content-Type')) {
-            res = res.type(req.get('Content-Type'));
-        }
+        // PUT 
+        // Requires JWT Auth
         var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "movie updated";
+        o.query = req.query;
         res.json(o);
-    }
-    );
+    })
+    .delete(authController.isAuthenticated, (req, res) => {
+        // DELETE 
+        // Requires Basic Auth
+        var o = getJSONObjectForMovieRequirement(req);
+        o.status = 200;
+        o.message = "movie deleted";
+        o.query = req.query;
+        res.json(o);
+    })
+    .all((req, res) => {
+        // For any other method (e.g., PATCH), return error
+        res.status(405).send({ message: 'HTTP method not supported.' });
+    });
     
 app.use('/', router);
 app.listen(process.env.PORT || 8080);
